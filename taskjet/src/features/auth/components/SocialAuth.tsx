@@ -13,8 +13,8 @@ export function SocialAuth() {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
-        <Button variant="outline" className="w-full gap-2">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+        <Button variant="outline" className="w-full gap-2 h-10">
           <img
             src="https://lh3.googleusercontent.com/aida-public/AB6AXuDzYDJ24Ht8Sfc2gxINqjb2qA24PP8Z0dbEDPcVNd95NQa0x-CGwvUaVKic1K2xB8oDTEdyc3cosCWkoB5D_dIGu6eRER9EAodc7ITt5ZnsDdUzzSRum7s3N2-tFgF1q_r7yQ1IAa7x-JYr62AmS9yWMHCvKCP45Za6588sO_0itN2j-BEakbs9LSy3oviqDOlqdQaIi68wQRvJqJQ8NufQ_3oQPhlcYFtxSWZhRO3PB2dSRFH6bNWmUSm6H7QOpoDIyF5kqRqQLcs"
             alt="Google"

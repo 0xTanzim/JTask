@@ -10,8 +10,8 @@ export function AuthTabs() {
   const isRegister = pathname === '/register';
 
   return (
-    <div className="mb-8">
-      <div className="flex border-b border-border gap-8">
+    <div className="mb-8 overflow-x-auto no-scrollbar">
+      <div className="flex border-b border-border gap-4 sm:gap-8 min-w-max">
         <Link
           href="/login"
           className={cn(

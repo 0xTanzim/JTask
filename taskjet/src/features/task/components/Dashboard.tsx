@@ -36,46 +36,46 @@ export function Dashboard() {
   const completedCount = tasks.filter(t => t.status === 'done').length;
 
   return (
-    <div className="p-8 space-y-10">
-      <div className="flex items-end justify-between">
-        <div>
-          <h1 className="text-4xl font-bold text-white mb-2">Task Dashboard</h1>
-          <p className="text-slate-500 font-medium">Manage your upcoming priorities and track progress.</p>
+    <div className="space-y-6 md:space-y-10">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <div className="text-center md:text-left">
+          <h1 className="text-2xl md:text-4xl font-bold text-white mb-1 md:mb-2">Task Dashboard</h1>
+          <p className="text-slate-500 font-medium text-sm md:text-base">Manage your upcoming priorities and track progress.</p>
         </div>
-        <div className="hidden md:flex gap-4">
-          <div className="bg-[#16212e] border border-[#223145] px-4 py-2 rounded-lg flex flex-col items-center justify-center min-w-[120px]">
-            <span className="text-white font-bold">{tasks.length} Tasks Total</span>
+        <div className="grid grid-cols-2 lg:flex gap-3 md:gap-4 justify-center md:justify-start">
+          <div className="bg-[#16212e] border border-[#223145] px-3 md:px-4 py-2 rounded-lg flex flex-col items-center justify-center">
+            <span className="text-white font-bold text-xs md:text-sm">{tasks.length} Total</span>
           </div>
-          <div className="bg-emerald-500/10 border border-emerald-500/20 px-4 py-2 rounded-lg flex flex-col items-center justify-center min-w-[120px]">
-            <span className="text-emerald-500 font-bold">{completedCount} Completed</span>
+          <div className="bg-emerald-500/10 border border-emerald-500/20 px-3 md:px-4 py-2 rounded-lg flex flex-col items-center justify-center">
+            <span className="text-emerald-500 font-bold text-xs md:text-sm">{completedCount} Done</span>
           </div>
         </div>
       </div>
 
       <div className="space-y-6">
         <Tabs defaultValue="all" className="w-full" onValueChange={setFilter}>
-          <TabsList className="bg-transparent h-auto p-0 border-b border-border w-full justify-start rounded-none gap-8">
+          <TabsList className="bg-transparent h-auto p-0 border-b border-border w-full justify-start rounded-none gap-4 md:gap-8 overflow-x-auto no-scrollbar">
             <TabsTrigger 
               value="all" 
-              className="px-0 py-3 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-primary text-slate-500 font-bold text-sm uppercase tracking-wide"
+              className="px-0 py-3 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-primary text-slate-500 font-bold text-[10px] md:text-sm uppercase tracking-wide whitespace-nowrap"
             >
               All Tasks
             </TabsTrigger>
             <TabsTrigger 
               value="todo" 
-              className="px-0 py-3 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-primary text-slate-500 font-bold text-sm uppercase tracking-wide"
+              className="px-0 py-3 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-primary text-slate-500 font-bold text-[10px] md:text-sm uppercase tracking-wide whitespace-nowrap"
             >
               To Do
             </TabsTrigger>
             <TabsTrigger 
               value="in-progress" 
-              className="px-0 py-3 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-primary text-slate-500 font-bold text-sm uppercase tracking-wide"
+              className="px-0 py-3 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-primary text-slate-500 font-bold text-[10px] md:text-sm uppercase tracking-wide whitespace-nowrap"
             >
               In Progress
             </TabsTrigger>
             <TabsTrigger 
               value="done" 
-              className="px-0 py-3 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-primary text-slate-500 font-bold text-sm uppercase tracking-wide"
+              className="px-0 py-3 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-primary text-slate-500 font-bold text-[10px] md:text-sm uppercase tracking-wide whitespace-nowrap"
             >
               Done
             </TabsTrigger>

@@ -75,25 +75,25 @@ export function TaskItem({ task }: TaskItemProps) {
             )}
           </div>
 
-          <div className="flex items-center gap-5 text-xs text-slate-500 font-medium">
+          <div className="flex flex-wrap items-center gap-3 md:gap-5 text-[11px] md:text-xs text-slate-500 font-medium">
             <div className="flex items-center gap-1.5">
               <Calendar className="size-3.5" />
               <span>{task.dueDate}</span>
             </div>
             <div className="flex items-center gap-1.5">
               <div className={cn("size-2 rounded-full", priorityColors[task.priority])} />
-              <span className="capitalize">{task.priority} Priority</span>
+              <span className="capitalize">{task.priority}</span>
             </div>
             {task.commentCount > 0 && (
               <div className="flex items-center gap-1.5">
                 <MessageSquare className="size-3.5" />
-                <span>{task.commentCount} Comments</span>
+                <span>{task.commentCount}</span>
               </div>
             )}
             {task.status === 'in-progress' && (
               <div className="flex items-center gap-1.5 text-blue-500">
                 <Clock className="size-3.5" />
-                <span>In Progress</span>
+                <span>Active</span>
               </div>
             )}
             {task.status === 'done' && (

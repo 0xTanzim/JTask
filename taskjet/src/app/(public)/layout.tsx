@@ -7,7 +7,7 @@ export default function AuthLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex min-h-screen bg-background text-foreground antialiased overflow-hidden">
+    <div className="flex min-h-screen bg-background text-foreground antialiased overflow-y-auto lg:overflow-hidden">
       {/* Visual Side (Left) */}
       <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-primary/10 items-center justify-center border-r border-border">
         {/* Abstract Pattern */}
@@ -55,9 +55,9 @@ export default function AuthLayout({
       </div>
 
       {/* Auth Side (Right) */}
-      <div className="w-full lg:w-1/2 flex flex-col justify-center items-center px-6 md:px-12 bg-background relative">
+      <div className="w-full lg:w-1/2 flex flex-col justify-center items-center px-6 md:px-12 bg-background py-12 lg:py-0">
         {/* Mobile Header */}
-        <div className="lg:hidden absolute top-8 left-8 flex items-center gap-2">
+        <div className="lg:hidden flex items-center gap-2 mb-10 w-full max-w-[440px]">
           <div className="size-8 bg-primary rounded flex items-center justify-center">
             <ShieldCheck className="text-primary-foreground size-5" />
           </div>
