@@ -1,10 +1,10 @@
 'use client';
 
-import React from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { X, Check } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import {
+  createCategory,
+  updateCategory as updateCategoryAction,
+} from '@/actions/category';
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
@@ -20,11 +20,15 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { categorySchema, CategoryFormValues } from '../validators';
-import { useCategoryStore } from '../store/category.store';
-import { Category } from '../types';
+import { cn } from '@/lib/utils';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Check } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import React from 'react';
+import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
+import { Category } from '../types';
+import { CategoryFormValues, categorySchema } from '../validators';
 
 interface CategoryModalProps {
   isOpen: boolean;
@@ -43,9 +47,13 @@ const COLORS = [
   { text: 'text-yellow-500', bg: 'bg-yellow-500', bgLight: 'bg-yellow-500/10' },
 ];
 
-export function CategoryModal({ isOpen, onClose, category }: CategoryModalProps) {
-  const addCategory = useCategoryStore((state) => state.addCategory);
-  const updateCategory = useCategoryStore((state) => state.updateCategory);
+export function CategoryModal({
+  isOpen,
+  onClose,
+  category,
+}: CategoryModalProps) {
+  const router = useRouter();
+  const [isPending, setIsPending] = React.useState(false);
 
   const form = useForm<CategoryFormValues>({
     resolver: zodResolver(categorySchema),
@@ -71,16 +79,28 @@ export function CategoryModal({ isOpen, onClose, category }: CategoryModalProps)
     }
   }, [isOpen, category, form]);
 
-  const onSubmit = (values: CategoryFormValues) => {
-    if (category) {
-      updateCategory(category.id, values);
-      toast.success('Category updated successfully');
-    } else {
-      addCategory(values);
-      toast.success('Category created successfully');
+  const onSubmit = async (values: CategoryFormValues) => {
+    setIsPending(true);
+    try {
+      const result = category
+        ? await updateCategoryAction(category.id, values)
+        : await createCategory(values);
+
+      if (!result.success) {
+        toast.error(result.error || 'Operation failed');
+        return;
+      }
+
+      toast.success(category ? 'Category updated' : 'Category created');
+      onClose();
+      form.reset();
+      // Force page reload to show new category in sidebar
+      window.location.reload();
+    } catch (error) {
+      toast.error('Something went wrong');
+    } finally {
+      setIsPending(false);
     }
-    onClose();
-    form.reset();
   };
 
   return (
@@ -93,17 +113,22 @@ export function CategoryModal({ isOpen, onClose, category }: CategoryModalProps)
         </DialogHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="p-6 space-y-6">
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="p-6 space-y-6"
+          >
             <FormField
               control={form.control}
               name="name"
               render={({ field }) => (
                 <FormItem className="space-y-2">
-                  <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Category Name</FormLabel>
+                  <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-slate-500">
+                    Category Name
+                  </FormLabel>
                   <FormControl>
-                    <Input 
-                      {...field} 
-                      placeholder="e.g., Work, Personal, etc." 
+                    <Input
+                      {...field}
+                      placeholder="e.g., Work, Personal, etc."
                       className="bg-[#16212e] border-[#223145] text-white placeholder:text-slate-600 h-11"
                     />
                   </FormControl>
@@ -117,7 +142,9 @@ export function CategoryModal({ isOpen, onClose, category }: CategoryModalProps)
               name="color"
               render={({ field }) => (
                 <FormItem className="space-y-4">
-                  <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Pick A Color</FormLabel>
+                  <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-slate-500">
+                    Pick A Color
+                  </FormLabel>
                   <FormControl>
                     <div className="grid grid-cols-4 gap-3">
                       {COLORS.map((color) => (
@@ -126,12 +153,16 @@ export function CategoryModal({ isOpen, onClose, category }: CategoryModalProps)
                           type="button"
                           onClick={() => field.onChange(color.text)}
                           className={cn(
-                            "group relative size-12 rounded-xl flex items-center justify-center transition-all",
+                            'group relative size-12 rounded-xl flex items-center justify-center transition-all',
                             color.bgLight,
-                            field.value === color.text ? "ring-2 ring-primary ring-offset-2 ring-offset-[#101822]" : "hover:scale-105"
+                            field.value === color.text
+                              ? 'ring-2 ring-primary ring-offset-2 ring-offset-[#101822]'
+                              : 'hover:scale-105'
                           )}
                         >
-                          <div className={cn("size-4 rounded-full", color.bg)} />
+                          <div
+                            className={cn('size-4 rounded-full', color.bg)}
+                          />
                           {field.value === color.text && (
                             <Check className="absolute size-4 text-white" />
                           )}
@@ -145,9 +176,9 @@ export function CategoryModal({ isOpen, onClose, category }: CategoryModalProps)
             />
 
             <div className="pt-6 flex items-center justify-end gap-3 border-t border-[#223145] mt-6 -mx-6 px-6">
-              <Button 
-                type="button" 
-                variant="ghost" 
+              <Button
+                type="button"
+                variant="ghost"
                 onClick={onClose}
                 className="text-slate-400 hover:text-white"
               >

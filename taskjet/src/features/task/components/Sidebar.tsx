@@ -1,28 +1,28 @@
 'use client';
 
-import React from 'react';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { 
-  Calendar, 
-  Settings, 
-  LogOut, 
-  Plus, 
-  LayoutDashboard,
-  CheckCircle2,
-  Tag,
-  Edit2,
-  X,
-  ChevronLeft,
-  ChevronRight
-} from 'lucide-react';
-import { cn, getCategoryBg, getCategoryLightBg } from '@/lib/utils';
+import { logoutAction } from '@/actions/auth';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { useAuthStore } from '@/features/auth/store/auth.store';
-import { useCategoryStore } from '@/features/category/store/category.store';
-import { useTaskStore } from '@/features/task/store/task.store';
 import { CategoryModal } from '@/features/category/components/CategoryModal';
+import { Category } from '@/features/category/types';
+import { useTaskStore } from '@/features/task/store/task.store';
+import { cn, getCategoryLightBg } from '@/lib/utils';
+import {
+  Calendar,
+  CheckCircle2,
+  ChevronLeft,
+  ChevronRight,
+  Edit2,
+  LayoutDashboard,
+  LogOut,
+  Plus,
+  Settings,
+  Tag,
+  X,
+} from 'lucide-react';
+import Link from 'next/link';
+import { usePathname, useRouter } from 'next/navigation';
+import React from 'react';
 
 const sidebarItems = [
   { icon: LayoutDashboard, label: 'Overview', href: '/dashboard' },
@@ -32,13 +32,24 @@ const sidebarItems = [
 interface SidebarProps {
   className?: string;
   onClose?: () => void;
+  categories: Category[];
+  userEmail: string;
 }
 
-export function Sidebar({ className, onClose }: SidebarProps) {
+export function Sidebar({
+  className,
+  onClose,
+  categories,
+  userEmail,
+}: SidebarProps) {
   const pathname = usePathname();
-  const { user, logout } = useAuthStore();
-  const { categories } = useCategoryStore();
+  const router = useRouter();
   const { selectedCategoryId, setSelectedCategoryId } = useTaskStore();
+
+  const handleLogout = async () => {
+    await logoutAction();
+    router.push('/login');
+  };
   const [isCategoryModalOpen, setIsCategoryModalOpen] = React.useState(false);
   const [categoryToEdit, setCategoryToEdit] = React.useState<any>(null);
   const [isCollapsed, setIsCollapsed] = React.useState(false);
@@ -65,11 +76,13 @@ export function Sidebar({ className, onClose }: SidebarProps) {
 
   return (
     <>
-      <aside className={cn(
-        "bg-[#0d131c] border-r border-[#223145] flex flex-col h-screen text-slate-400 transition-all duration-300 ease-in-out shrink-0 relative",
-        isCollapsed ? "w-20" : "w-64",
-        className
-      )}>
+      <aside
+        className={cn(
+          'bg-[#0d131c] border-r border-[#223145] flex flex-col h-screen text-slate-400 transition-all duration-300 ease-in-out shrink-0 relative',
+          isCollapsed ? 'w-20' : 'w-64',
+          className
+        )}
+      >
         {/* Collapse Toggle Button - Desktop only */}
         <button
           onClick={toggleCollapse}
@@ -85,9 +98,9 @@ export function Sidebar({ className, onClose }: SidebarProps) {
         <div className="p-6 relative h-full flex flex-col">
           {/* Mobile Close Button */}
           {onClose && (
-            <Button 
-              variant="ghost" 
-              size="icon" 
+            <Button
+              variant="ghost"
+              size="icon"
               className="absolute top-4 right-2 xl:hidden text-slate-400 hover:text-white"
               onClick={onClose}
             >
@@ -95,10 +108,10 @@ export function Sidebar({ className, onClose }: SidebarProps) {
             </Button>
           )}
 
-          <div 
+          <div
             className={cn(
-              "flex items-center gap-3 transition-all cursor-pointer",
-              isCollapsed ? "mb-10 justify-center" : "mb-10 px-2"
+              'flex items-center gap-3 transition-all cursor-pointer',
+              isCollapsed ? 'mb-10 justify-center' : 'mb-10 px-2'
             )}
             onClick={() => {
               setSelectedCategoryId(null);
@@ -130,16 +143,25 @@ export function Sidebar({ className, onClose }: SidebarProps) {
                     onClick={handleSidebarClick}
                     title={isCollapsed ? item.label : undefined}
                     className={cn(
-                      "flex items-center gap-3 px-3 py-2 rounded-lg transition-colors group",
-                      isCollapsed ? "justify-center" : "",
-                      pathname === item.href 
-                        ? "bg-primary/10 text-primary" 
-                        : "hover:bg-primary/5 hover:text-white"
+                      'flex items-center gap-3 px-3 py-2 rounded-lg transition-colors group',
+                      isCollapsed ? 'justify-center' : '',
+                      pathname === item.href
+                        ? 'bg-primary/10 text-primary'
+                        : 'hover:bg-primary/5 hover:text-white'
                     )}
                   >
-                    <item.icon className={cn("size-5 shrink-0", pathname === item.href ? "text-primary" : "text-slate-400 group-hover:text-white")} />
+                    <item.icon
+                      className={cn(
+                        'size-5 shrink-0',
+                        pathname === item.href
+                          ? 'text-primary'
+                          : 'text-slate-400 group-hover:text-white'
+                      )}
+                    />
                     {!isCollapsed && (
-                      <span className="font-medium whitespace-nowrap overflow-hidden">{item.label}</span>
+                      <span className="font-medium whitespace-nowrap overflow-hidden">
+                        {item.label}
+                      </span>
                     )}
                   </Link>
                 ))}
@@ -147,21 +169,23 @@ export function Sidebar({ className, onClose }: SidebarProps) {
             </div>
 
             <div>
-              <div className={cn(
-                "flex items-center mb-4 px-2",
-                isCollapsed ? "justify-center" : "justify-between"
-              )}>
+              <div
+                className={cn(
+                  'flex items-center mb-4 px-2',
+                  isCollapsed ? 'justify-center' : 'justify-between'
+                )}
+              >
                 {!isCollapsed && (
                   <div className="text-xs font-semibold uppercase tracking-wider text-slate-500">
                     Categories
                   </div>
                 )}
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
+                <Button
+                  variant="ghost"
+                  size="icon"
                   className="size-5 hover:bg-primary/10"
                   onClick={handleAddCategory}
-                  title={isCollapsed ? "Add Category" : undefined}
+                  title={isCollapsed ? 'Add Category' : undefined}
                 >
                   <Plus className="size-4" />
                 </Button>
@@ -171,23 +195,32 @@ export function Sidebar({ className, onClose }: SidebarProps) {
                   <div
                     key={category.id}
                     onClick={() => {
-                      setSelectedCategoryId(category.id === selectedCategoryId ? null : category.id);
+                      setSelectedCategoryId(
+                        category.id === selectedCategoryId ? null : category.id
+                      );
                       handleSidebarClick();
                     }}
                     title={isCollapsed ? category.name : undefined}
                     className={cn(
-                      "w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors group text-left cursor-pointer",
-                      isCollapsed ? "justify-center" : "",
-                      selectedCategoryId === category.id 
-                        ? "bg-primary/10 text-primary" 
-                        : "hover:bg-primary/5 hover:text-white"
+                      'w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors group text-left cursor-pointer',
+                      isCollapsed ? 'justify-center' : '',
+                      selectedCategoryId === category.id
+                        ? 'bg-primary/10 text-primary'
+                        : 'hover:bg-primary/5 hover:text-white'
                     )}
                   >
-                    <div className={cn("p-1.5 rounded-md shrink-0", getCategoryLightBg(category.color))}>
-                      <Tag className={cn("size-4", category.color)} />
+                    <div
+                      className={cn(
+                        'p-1.5 rounded-md shrink-0',
+                        getCategoryLightBg(category.color)
+                      )}
+                    >
+                      <Tag className={cn('size-4', category.color)} />
                     </div>
                     {!isCollapsed && (
-                      <span className="font-medium truncate flex-1">{category.name}</span>
+                      <span className="font-medium truncate flex-1">
+                        {category.name}
+                      </span>
                     )}
                     {!isCollapsed && (
                       <Button
@@ -206,65 +239,78 @@ export function Sidebar({ className, onClose }: SidebarProps) {
           </div>
         </div>
 
-          <div className={cn(
-            "mt-auto pt-6 border-t border-[#223145] space-y-4",
-            isCollapsed ? "flex flex-col items-center" : ""
-          )}>
-            <div className={cn(
-              "flex items-center gap-3 px-2 py-2",
-              isCollapsed ? "justify-center" : ""
-            )}>
-              <Avatar className="size-9 border border-[#223145] shrink-0">
-                <AvatarImage src={user?.avatar} />
-                <AvatarFallback className="bg-primary/10 text-primary text-xs font-bold">
-                  {user?.name?.substring(0, 2).toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
-              {!isCollapsed && (
-                <div className="flex-1 min-w-0">
-                  <div className="text-sm font-bold text-white truncate">{user?.name}</div>
-                  <div className="text-[10px] text-slate-500 truncate">Pro Plan</div>
+        <div
+          className={cn(
+            'mt-auto pt-6 border-t border-[#223145] space-y-4',
+            isCollapsed ? 'flex flex-col items-center' : ''
+          )}
+        >
+          <div
+            className={cn(
+              'flex items-center gap-3 px-2 py-2',
+              isCollapsed ? 'justify-center' : ''
+            )}
+          >
+            <Avatar className="size-9 border border-[#223145] shrink-0">
+              <AvatarFallback className="bg-primary/10 text-primary text-xs font-bold">
+                {userEmail?.substring(0, 2).toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+            {!isCollapsed && (
+              <div className="flex-1 min-w-0">
+                <div className="text-sm font-bold text-white truncate">
+                  {userEmail}
                 </div>
-              )}
-            </div>
-            
-            <div className={cn(
-              "grid gap-2",
-              isCollapsed ? "flex flex-col items-center" : "grid-cols-2"
-            )}>
-              <Button 
-                variant="ghost" 
-                className={cn(
-                  "justify-start gap-2 h-9 text-slate-400 hover:text-white hover:bg-white/5",
-                  isCollapsed ? "px-0 w-9 justify-center" : "px-2"
-                )}
-                title={isCollapsed ? "Settings" : undefined}
-              >
-                <Settings className="size-4 shrink-0" />
-                {!isCollapsed && <span className="text-xs font-medium">Settings</span>}
-              </Button>
-              <Button 
-                variant="ghost" 
-                className={cn(
-                  "justify-start gap-2 h-9 text-red-400 hover:text-red-300 hover:bg-red-500/10",
-                  isCollapsed ? "px-0 w-9 justify-center" : "px-2"
-                )}
-                onClick={logout}
-                title={isCollapsed ? "Logout" : undefined}
-              >
-                <LogOut className="size-4 shrink-0" />
-                {!isCollapsed && <span className="text-xs font-medium">Logout</span>}
-              </Button>
-            </div>
+                <div className="text-[10px] text-slate-500 truncate">
+                  Pro Plan
+                </div>
+              </div>
+            )}
           </div>
+
+          <div
+            className={cn(
+              'grid gap-2',
+              isCollapsed ? 'flex flex-col items-center' : 'grid-cols-2'
+            )}
+          >
+            <Button
+              variant="ghost"
+              className={cn(
+                'justify-start gap-2 h-9 text-slate-400 hover:text-white hover:bg-white/5',
+                isCollapsed ? 'px-0 w-9 justify-center' : 'px-2'
+              )}
+              title={isCollapsed ? 'Settings' : undefined}
+            >
+              <Settings className="size-4 shrink-0" />
+              {!isCollapsed && (
+                <span className="text-xs font-medium">Settings</span>
+              )}
+            </Button>
+            <Button
+              variant="ghost"
+              className={cn(
+                'justify-start gap-2 h-9 text-red-400 hover:text-red-300 hover:bg-red-500/10',
+                isCollapsed ? 'px-0 w-9 justify-center' : 'px-2'
+              )}
+              onClick={handleLogout}
+              title={isCollapsed ? 'Logout' : undefined}
+            >
+              <LogOut className="size-4 shrink-0" />
+              {!isCollapsed && (
+                <span className="text-xs font-medium">Logout</span>
+              )}
+            </Button>
+          </div>
+        </div>
       </aside>
 
-      <CategoryModal 
-        isOpen={isCategoryModalOpen} 
+      <CategoryModal
+        isOpen={isCategoryModalOpen}
         onClose={() => {
           setIsCategoryModalOpen(false);
           setCategoryToEdit(null);
-        }} 
+        }}
         category={categoryToEdit}
       />
     </>

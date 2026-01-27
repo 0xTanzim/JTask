@@ -1,14 +1,7 @@
 'use client';
 
-import React from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
-import { useRouter } from 'next/navigation';
-import { loginSchema, LoginFormValues } from '../validators';
-import { useAuthStore } from '../store/auth.store';
+import { loginAction } from '@/actions/auth';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
   Form,
@@ -18,12 +11,19 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Eye, EyeOff, Lock, Mail } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import React from 'react';
+import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
+import { LoginFormValues, loginSchema } from '../validators';
 
 export function LoginForm() {
   const [showPassword, setShowPassword] = React.useState(false);
+  const [isPending, setIsPending] = React.useState(false);
   const router = useRouter();
-  const login = useAuthStore((state) => state.login);
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -35,19 +35,22 @@ export function LoginForm() {
   });
 
   const onSubmit = async (values: LoginFormValues) => {
+    setIsPending(true);
     try {
-      // Simulate API call
-      console.log('Login values:', values);
-      
-      // Simulate success
-      const mockUser = { id: '1', email: values.email, name: 'John Doe' };
-      const mockToken = 'mock-jwt-token';
-      
-      login(mockUser, mockToken);
+      const result = await loginAction(values.email, values.password);
+
+      if (!result.success) {
+        toast.error(result.error || 'Login failed');
+        return;
+      }
+
       toast.success('Successfully logged in!');
       router.push('/dashboard');
+      router.refresh();
     } catch (error) {
-      toast.error('Failed to login. Please check your credentials.');
+      toast.error('Failed to login. Please try again.');
+    } finally {
+      setIsPending(false);
     }
   };
 
@@ -85,7 +88,7 @@ export function LoginForm() {
             <FormItem className="space-y-2">
               <div className="flex items-center justify-between">
                 <FormLabel>Password</FormLabel>
-                <button 
+                <button
                   type="button"
                   className="text-sm font-semibold text-primary hover:text-primary/80"
                 >
@@ -108,7 +111,11 @@ export function LoginForm() {
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-muted-foreground hover:text-foreground"
                   >
-                    {showPassword ? <EyeOff className="size-5" /> : <Eye className="size-5" />}
+                    {showPassword ? (
+                      <EyeOff className="size-5" />
+                    ) : (
+                      <Eye className="size-5" />
+                    )}
                   </button>
                 </div>
               </FormControl>
@@ -135,8 +142,13 @@ export function LoginForm() {
           )}
         />
 
-        <Button type="submit" className="w-full py-6 font-bold" size="lg">
-          Sign in to account
+        <Button
+          type="submit"
+          className="w-full py-6 font-bold"
+          size="lg"
+          disabled={isPending}
+        >
+          {isPending ? 'Signing in...' : 'Sign in to account'}
         </Button>
       </form>
     </Form>

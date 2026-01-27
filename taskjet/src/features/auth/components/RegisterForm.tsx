@@ -1,14 +1,7 @@
 'use client';
 
-import React from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { Mail, Lock, User as UserIcon, Eye, EyeOff } from 'lucide-react';
-import { useRouter } from 'next/navigation';
-import { registerSchema, RegisterFormValues } from '../validators';
-import { useAuthStore } from '../store/auth.store';
+import { registerAction } from '@/actions/auth';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import {
   Form,
   FormControl,
@@ -17,12 +10,19 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Eye, EyeOff, Lock, Mail, User as UserIcon } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import React from 'react';
+import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
+import { RegisterFormValues, registerSchema } from '../validators';
 
 export function RegisterForm() {
   const [showPassword, setShowPassword] = React.useState(false);
+  const [isPending, setIsPending] = React.useState(false);
   const router = useRouter();
-  const login = useAuthStore((state) => state.login);
 
   const form = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
@@ -35,19 +35,25 @@ export function RegisterForm() {
   });
 
   const onSubmit = async (values: RegisterFormValues) => {
+    setIsPending(true);
     try {
-      // Simulate API call
-      console.log('Register values:', values);
-      
-      // Simulate success
-      const mockUser = { id: '1', email: values.email, name: values.name };
-      const mockToken = 'mock-jwt-token';
-      
-      login(mockUser, mockToken);
+      const result = await registerAction(
+        values.name,
+        values.email,
+        values.password
+      );
+
+      if (!result.success) {
+        toast.error(result.error || 'Registration failed');
+        return;
+      }
+
       toast.success('Account created successfully!');
-      router.push('/dashboard');
+      router.push('/login');
     } catch (error) {
       toast.error('Failed to create account. Please try again.');
+    } finally {
+      setIsPending(false);
     }
   };
 
@@ -65,11 +71,7 @@ export function RegisterForm() {
                   <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-muted-foreground">
                     <UserIcon className="size-5" />
                   </span>
-                  <Input
-                    {...field}
-                    placeholder="John Doe"
-                    className="pl-11"
-                  />
+                  <Input {...field} placeholder="John Doe" className="pl-11" />
                 </div>
               </FormControl>
               <FormMessage />
@@ -123,7 +125,11 @@ export function RegisterForm() {
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-muted-foreground hover:text-foreground"
                   >
-                    {showPassword ? <EyeOff className="size-5" /> : <Eye className="size-5" />}
+                    {showPassword ? (
+                      <EyeOff className="size-5" />
+                    ) : (
+                      <Eye className="size-5" />
+                    )}
                   </button>
                 </div>
               </FormControl>
@@ -156,8 +162,13 @@ export function RegisterForm() {
           )}
         />
 
-        <Button type="submit" className="w-full py-6 font-bold" size="lg">
-          Create account
+        <Button
+          type="submit"
+          className="w-full py-6 font-bold"
+          size="lg"
+          disabled={isPending}
+        >
+          {isPending ? 'Creating account...' : 'Create account'}
         </Button>
       </form>
     </Form>
